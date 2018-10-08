@@ -3,7 +3,7 @@ from unittest import mock, TestCase
 
 import github
 
-from clients.exceptions import UnknownProfileError
+from clients.exceptions import RateLimitError, UnknownProfileError
 from clients.github import GithubClient
 
 
@@ -21,6 +21,23 @@ class GithubClientTestCase(TestCase):
                 client.get_profile('foobar')
 
         self.assertEqual(str(cm.exception), 'No such GitHub account: foobar')
+
+    def test_get_profile_raises_error_on_rate_limit(self):
+        client = GithubClient()
+        error = github.RateLimitExceededException(None, None)
+        with ExitStack() as stack:
+            context_managers = (
+                mock.patch.object(client.client, 'get_user'),
+                mock.patch.object(client, '_get_user_data', return_value={}),
+                mock.patch.object(client, '_get_repository_data', return_value={}),
+                mock.patch.object(client, '_get_misc_data', side_effect=error),
+            )
+            for context_manager in context_managers:
+                stack.enter_context(context_manager)
+
+            with self.assertRaises(RateLimitError) as cm:
+                client.get_profile('foobar')
+            self.assertEqual(str(cm.exception), 'Exceeded GitHub rate limit')
 
     def test_get_profile_assembles_profile_data(self):
         client = GithubClient()

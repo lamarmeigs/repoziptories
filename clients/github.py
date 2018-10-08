@@ -1,6 +1,6 @@
 import github
 
-from clients.exceptions import UnknownProfileError
+from clients.exceptions import RateLimitError, UnknownProfileError
 
 
 class GithubClient:
@@ -22,6 +22,7 @@ class GithubClient:
         Raise:
             UnknownProfileError: if the given profile_name does not correspond
                 to GitHub user account
+            RateLimitError: if the number of requests exceeds GitHub's rate limit
         """
         try:
             user = self.client.get_user(profile_name)
@@ -29,11 +30,17 @@ class GithubClient:
             raise UnknownProfileError(
                 'No such GitHub account: {}'.format(profile_name)
             )
+        except github.RateLimitExceededException:
+            raise RateLimitError('Exceeded GitHub rate limit')
 
         profile = {}
-        profile.update(self._get_user_data(user))
-        profile.update(self._get_repository_data(user))
-        profile.update(self._get_misc_data(user))
+        try:
+            profile.update(self._get_user_data(user))
+            profile.update(self._get_repository_data(user))
+            profile.update(self._get_misc_data(user))
+        except github.RateLimitExceededException:
+            raise RateLimitError('Exceeded GitHub rate limit')
+
         return profile
 
     @staticmethod
