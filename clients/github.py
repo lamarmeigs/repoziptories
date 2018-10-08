@@ -1,9 +1,6 @@
 import github
 
-
-class UnknownProfileError(Exception):
-    """Raised when attempting to retrieve information on a non-existent user"""
-    pass
+from clients.exceptions import UnknownProfileError
 
 
 class GithubClient:

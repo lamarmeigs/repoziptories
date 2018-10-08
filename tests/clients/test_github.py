@@ -3,12 +3,8 @@ from unittest import mock, TestCase
 
 import github
 
-from clients.github import GithubClient, UnknownProfileError
-
-
-class UnknownProfileErrorTestCase(TestCase):
-    def test_inheritance(self):
-        self.assertIsInstance(UnknownProfileError(), Exception)
+from clients.exceptions import UnknownProfileError
+from clients.github import GithubClient
 
 
 class GithubClientTestCase(TestCase):
