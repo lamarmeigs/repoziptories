@@ -1,4 +1,3 @@
-import json
 from contextlib import ExitStack
 from unittest import mock, TestCase
 
@@ -12,7 +11,7 @@ class GetMergedProfilesTestCase(TestCase):
             context_managers = (
                 mock.patch.object(endpoints.GithubClient, 'get_profile'),
                 mock.patch.object(endpoints.BitBucketClient, 'get_profile'),
-                mock.patch.object(endpoints, '_make_response'),
+                mock.patch.object(endpoints, 'make_response'),
             )
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
@@ -22,14 +21,14 @@ class GetMergedProfilesTestCase(TestCase):
 
             endpoints.GithubClient.get_profile.assert_called_once_with('gh_user')
             endpoints.BitBucketClient.get_profile.assert_called_once_with('username', is_team=True)
-            endpoints._make_response.assert_called_once_with(
+            endpoints.make_response.assert_called_once_with(
                 {
                     'github': endpoints.GithubClient.get_profile.return_value,
                     'bitbucket': endpoints.BitBucketClient.get_profile.return_value,
                 },
                 200
             )
-            self.assertEqual(response, endpoints._make_response.return_value)
+            self.assertEqual(response, endpoints.make_response.return_value)
 
     def test_ignores_missing_github_profile(self):
         error = exceptions.UnknownProfileError()
@@ -37,7 +36,7 @@ class GetMergedProfilesTestCase(TestCase):
             context_managers = (
                 mock.patch.object(endpoints.GithubClient, 'get_profile', side_effect=error),
                 mock.patch.object(endpoints.BitBucketClient, 'get_profile'),
-                mock.patch.object(endpoints, '_make_response'),
+                mock.patch.object(endpoints, 'make_response'),
             )
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
@@ -47,14 +46,14 @@ class GetMergedProfilesTestCase(TestCase):
 
             endpoints.GithubClient.get_profile.assert_called_once_with('username')
             endpoints.BitBucketClient.get_profile.assert_called_once_with('username', is_team=True)
-            endpoints._make_response.assert_called_once_with(
+            endpoints.make_response.assert_called_once_with(
                 {
                     'github': None,
                     'bitbucket': endpoints.BitBucketClient.get_profile.return_value,
                 },
                 200
             )
-            self.assertEqual(response, endpoints._make_response.return_value)
+            self.assertEqual(response, endpoints.make_response.return_value)
 
     def test_raises_error_on_github_rate_limit(self):
         error = exceptions.RateLimitError('this is a test')
@@ -62,7 +61,7 @@ class GetMergedProfilesTestCase(TestCase):
             context_managers = (
                 mock.patch.object(endpoints.GithubClient, 'get_profile', side_effect=error),
                 mock.patch.object(endpoints.BitBucketClient, 'get_profile'),
-                mock.patch.object(endpoints, '_make_response'),
+                mock.patch.object(endpoints, 'make_response'),
             )
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
@@ -70,11 +69,11 @@ class GetMergedProfilesTestCase(TestCase):
             with endpoints.app.test_request_context('/v1/profile/username'):
                 response = endpoints.get_merged_profiles('username')
 
-            endpoints._make_response.assert_called_once_with(
+            endpoints.make_response.assert_called_once_with(
                 {'error': 'this is a test'},
                 429
             )
-            self.assertEqual(response, endpoints._make_response.return_value)
+            self.assertEqual(response, endpoints.make_response.return_value)
 
     def test_raises_error_on_invalid_github_credentials(self):
         error = exceptions.InvalidCredentialsError('this is a test')
@@ -82,7 +81,7 @@ class GetMergedProfilesTestCase(TestCase):
             context_managers = (
                 mock.patch.object(endpoints.GithubClient, 'get_profile', side_effect=error),
                 mock.patch.object(endpoints.BitBucketClient, 'get_profile'),
-                mock.patch.object(endpoints, '_make_response'),
+                mock.patch.object(endpoints, 'make_response'),
             )
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
@@ -90,11 +89,11 @@ class GetMergedProfilesTestCase(TestCase):
             with endpoints.app.test_request_context('/v1/profile/username'):
                 response = endpoints.get_merged_profiles('username')
 
-            endpoints._make_response.assert_called_once_with(
+            endpoints.make_response.assert_called_once_with(
                 {'error': 'this is a test'},
                 401
             )
-            self.assertEqual(response, endpoints._make_response.return_value)
+            self.assertEqual(response, endpoints.make_response.return_value)
 
     def test_ignores_missing_bitbucket_profile(self):
         error = exceptions.UnknownProfileError()
@@ -102,7 +101,7 @@ class GetMergedProfilesTestCase(TestCase):
             context_managers = (
                 mock.patch.object(endpoints.GithubClient, 'get_profile'),
                 mock.patch.object(endpoints.BitBucketClient, 'get_profile', side_effect=error),
-                mock.patch.object(endpoints, '_make_response'),
+                mock.patch.object(endpoints, 'make_response'),
             )
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
@@ -112,14 +111,14 @@ class GetMergedProfilesTestCase(TestCase):
 
             endpoints.GithubClient.get_profile.assert_called_once_with('username')
             endpoints.BitBucketClient.get_profile.assert_called_once_with('username', is_team=True)
-            endpoints._make_response.assert_called_once_with(
+            endpoints.make_response.assert_called_once_with(
                 {
                     'github': endpoints.GithubClient.get_profile.return_value,
                     'bitbucket': None,
                 },
                 200
             )
-            self.assertEqual(response, endpoints._make_response.return_value)
+            self.assertEqual(response, endpoints.make_response.return_value)
 
     def test_raises_error_on_bitbucket_rate_limit(self):
         error = exceptions.RateLimitError('this is a test')
@@ -127,7 +126,7 @@ class GetMergedProfilesTestCase(TestCase):
             context_managers = (
                 mock.patch.object(endpoints.GithubClient, 'get_profile'),
                 mock.patch.object(endpoints.BitBucketClient, 'get_profile', side_effect=error),
-                mock.patch.object(endpoints, '_make_response'),
+                mock.patch.object(endpoints, 'make_response'),
             )
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
@@ -135,20 +134,8 @@ class GetMergedProfilesTestCase(TestCase):
             with endpoints.app.test_request_context('/v1/profile/username'):
                 response = endpoints.get_merged_profiles('username')
 
-            endpoints._make_response.assert_called_once_with(
+            endpoints.make_response.assert_called_once_with(
                 {'error': 'this is a test'},
                 429
             )
-            self.assertEqual(response, endpoints._make_response.return_value)
-
-
-class MakeResponseTestCase(TestCase):
-    def test_serializes_content(self):
-        with mock.patch.object(endpoints, 'make_response') as mock_make_response:
-            response = endpoints._make_response({'foo': 'bar'}, 200)
-        mock_make_response.assert_called_once_with(
-            json.dumps({'foo': 'bar'}),
-            200,
-            {'Content-Type': 'application/json'}
-        )
-        self.assertEqual(response, mock_make_response.return_value)
+            self.assertEqual(response, endpoints.make_response.return_value)

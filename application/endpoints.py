@@ -1,8 +1,8 @@
-import json
 from distutils.util import strtobool
 
-from flask import Flask, make_response, request
+from flask import Flask, request
 
+from application.helpers import make_response
 from clients import GithubClient, BitBucketClient
 from clients.exceptions import (
     InvalidCredentialsError,
@@ -26,9 +26,9 @@ def get_merged_profiles(username):
     except UnknownProfileError:
         profile['github'] = None
     except RateLimitError as error:
-        return _make_response({'error': str(error)}, 429)
+        return make_response({'error': str(error)}, 429)
     except InvalidCredentialsError as error:
-        return _make_response({'error': str(error)}, 401)
+        return make_response({'error': str(error)}, 401)
 
     bitbucket_username = request.args.get('bitbucket_username', username)
     is_team = bool(strtobool(request.args.get('bitbucket_team', 'true')))
@@ -38,14 +38,6 @@ def get_merged_profiles(username):
     except UnknownProfileError:
         profile['bitbucket'] = None
     except RateLimitError as error:
-        return _make_response({'error': str(error)}, 429)
+        return make_response({'error': str(error)}, 429)
 
-    return _make_response(profile, 200)
-
-
-def _make_response(content, status):
-    return make_response(
-        json.dumps(content),
-        status,
-        {'Content-Type': 'application/json'}
-    )
+    return make_response(profile, 200)
