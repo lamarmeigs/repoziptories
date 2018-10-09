@@ -36,7 +36,7 @@ class GetConfigTestCase(TestCase):
 
     def test_override_yaml_from_envvar(self):
         self._write_config({'some_config_key': 'some_config_val'})
-        with mock.patch.dict(os.environ, {'some_config_key': 'other_val'}):
+        with mock.patch.dict(os.environ, {'SOME_CONFIG_KEY': 'other_val'}):
             loaded_config = config._get_config('config/config.yaml')
         self.assertEqual(loaded_config, {'some_config_key': 'other_val'})
 
