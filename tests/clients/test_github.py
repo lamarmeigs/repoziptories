@@ -92,27 +92,32 @@ class GithubClientTestCase(TestCase):
 
     def test_get_repository_data_retrieves_data(self):
         user = mock.MagicMock()
-        user.get_repos.return_value = [
-            mock.MagicMock(
-                fork=True,
-                stargazers_count=2,
-                open_issues_count=4,
-                language='Python',
-                topics=['test', 'repositories']
-            ),
-            mock.MagicMock(
-                fork=False,
-                stargazers_count=3,
-                open_issues_count=0,
-                language='JavaScript',
-                topics=None,
-            )
-        ]
+        repo_1 = mock.MagicMock(
+            fork=True,
+            stargazers_count=2,
+            open_issues_count=4,
+            watchers_count=6,
+            language='Python',
+            topics=['test', 'repositories']
+        )
+        repo_1.get_commits.return_value.totalCount = 30
+        repo_2 = mock.MagicMock(
+            fork=False,
+            stargazers_count=3,
+            open_issues_count=0,
+            watchers_count=0,
+            language='JavaScript',
+            topics=None,
+        )
+        repo_2.get_commits.return_value.totalCount = 79
+        user.get_repos.return_value = [repo_1, repo_2]
 
         data = GithubClient._get_repository_data(user)
         self.assertIsInstance(data, dict)
         self.assertEqual(data['repositories'], {'original': 1, 'forked': 1})
         self.assertEqual(data['stars'], 5)
         self.assertEqual(data['issues'], 4)
+        self.assertEqual(data['watchers'], 6)
+        self.assertEqual(data['commits'], 79)
         self.assertCountEqual(data['languages'], ['Python', 'JavaScript'])
         self.assertCountEqual(data['topics'], ['test', 'repositories'])

@@ -89,6 +89,7 @@ class GithubClient:
         original_repo_commits = 0
         stars_received = 0
         issues = 0
+        watchers = 0
         languages = set()
         topics = set()
         for repo in user.get_repos():
@@ -99,6 +100,7 @@ class GithubClient:
                 forked_repo_count += 1
             stars_received += repo.stargazers_count
             issues += repo.open_issues_count
+            watchers += repo.watchers_count
             if repo.language:
                 languages.add(repo.language)
             if repo.topics:
@@ -111,6 +113,8 @@ class GithubClient:
             },
             'stars': stars_received,
             'issues': issues,
+            'watchers': watchers,
+            'commits': original_repo_commits,
             'languages': list(languages),
             'topics': list(topics),
         }
