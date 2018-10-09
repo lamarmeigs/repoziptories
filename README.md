@@ -1,6 +1,7 @@
 # repoziptories
 This project aims to implement a RESTful API that merges profile data from [GitHub](https://github.com) and [BitBucket](https://bitbucket.org). Per the preferred requirements, it will run on Flask and Python 3.6.
 
+
 ## Usage
 Prior to running this application, please note the following prerequisites:
 
@@ -15,7 +16,14 @@ $ pipenv shell
 $ python run.py
 ```
 
+
 ## Changelog
+### Version 1.1
+  - Updates `GET /v1/profile/{username}` to accept overriding usernames:
+    - `?github_username`: will be used instead of `username` when retrieving GitHub profile data
+    - `?bitbucket_username`: will be used instead of `username` when retrieving BitBucket profile data
+    - `?bitbucket_team`: indicates either the BitBucket profile is that of a team or an individual user
+
 ### Version 1.0
   - A single endpoint exists: `GET /v1/profile/{username}`
     - An account corresponding to the given username will be sought in both GitHub and BitBucket.
@@ -23,11 +31,8 @@ $ python run.py
     - Missing accounts are ignored.
     - Any rate limiting or bad credentials will result in failure.
 
+
 ## To Do:
-  - Override Username via Query Parameter
-
-      The V1 endpoint assumes that the given username reflects accounts on both GitHub and BitBucket. This might not be the case. The application should allow for query parameters to override the username for each service, possibly according to the following pattern: `GET /v1/profile/{username}?github_username={github_user}&bitbucket_username={bitbucket_user}`.
-
   - Concurrency
 
       Both client classes have to send multiple requests to gather all needed profile data. Running all requests sequentially causes unnecessary delays. Instead, the application can streamline its behavior by retrieving separate data concurrently, either individual requests (via a library like [`requests-futures`](https://github.com/ross/requests-futures)) or separate client methods.
