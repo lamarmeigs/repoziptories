@@ -22,3 +22,11 @@ class RateLimitErrorTestCase(TestCase):
             exceptions.RateLimitError(),
             exceptions.ApiResponseError
         )
+
+
+class InvalidCredentialsErrorTestCase(TestCase):
+    def test_inheritance(self):
+        self.assertIsInstance(
+            exceptions.InvalidCredentialsError(),
+            exceptions.ApiResponseError
+        )

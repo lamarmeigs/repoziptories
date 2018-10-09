@@ -11,3 +11,8 @@ class UnknownProfileError(ApiResponseError):
 class RateLimitError(ApiResponseError):
     """Raised when the 3rd-party service's rate limit has been hit"""
     pass
+
+
+class InvalidCredentialsError(ApiResponseError):
+    """Raised on failed authentication"""
+    pass

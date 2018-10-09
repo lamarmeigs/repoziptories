@@ -1,6 +1,10 @@
 import github
 
-from clients.exceptions import RateLimitError, UnknownProfileError
+from clients.exceptions import (
+    InvalidCredentialsError,
+    RateLimitError,
+    UnknownProfileError,
+)
 
 
 class GithubClient:
@@ -32,6 +36,8 @@ class GithubClient:
             )
         except github.RateLimitExceededException:
             raise RateLimitError('Exceeded GitHub rate limit')
+        except github.BadCredentialsException:
+            raise InvalidCredentialsError('Cannot authenticate with given credentials')
 
         profile = {}
         try:

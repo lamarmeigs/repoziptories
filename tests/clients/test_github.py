@@ -3,7 +3,11 @@ from unittest import mock, TestCase
 
 import github
 
-from clients.exceptions import RateLimitError, UnknownProfileError
+from clients.exceptions import (
+    InvalidCredentialsError,
+    RateLimitError,
+    UnknownProfileError,
+)
 from clients.github import GithubClient
 
 
@@ -37,6 +41,25 @@ class GithubClientTestCase(TestCase):
             with self.assertRaises(RateLimitError) as cm:
                 client.get_profile('foobar')
             self.assertEqual(str(cm.exception), 'Exceeded GitHub rate limit')
+
+    def test_get_profile_raises_error_on_bad_credentials(self):
+        client = GithubClient()
+        error = github.BadCredentialsException(None, None)
+        with ExitStack() as stack:
+            context_managers = (
+                mock.patch.object(client.client, 'get_user', side_effect=error),
+                mock.patch.object(client, '_get_user_data', return_value={}),
+                mock.patch.object(client, '_get_repository_data', return_value={}),
+            )
+            for context_manager in context_managers:
+                stack.enter_context(context_manager)
+
+            with self.assertRaises(InvalidCredentialsError) as cm:
+                client.get_profile('foobar')
+            self.assertEqual(
+                str(cm.exception),
+                'Cannot authenticate with given credentials'
+            )
 
     def test_get_profile_assembles_profile_data(self):
         client = GithubClient()
