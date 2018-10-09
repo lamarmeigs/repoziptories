@@ -4,7 +4,7 @@ from unittest import mock, TestCase
 import responses
 
 from clients.bitbucket import config, BitBucketClient
-from clients.exceptions import ApiResponseError, UnknownProfileError
+from clients.exceptions import ApiResponseError, RateLimitError, UnknownProfileError
 
 
 class BitBucketClientTestCase(TestCase):
@@ -24,7 +24,19 @@ class BitBucketClientTestCase(TestCase):
         self.assertEqual(client._get_resource(test_url), test_response)
 
     @responses.activate
-    def test_get_resource_raises_error_on_failure(self):
+    def test_get_resource_raises_error_on_rate_limit(self):
+        client = BitBucketClient()
+        test_url = 'https://api.bitbucket.org/2.0/teams/mailchimp'
+        test_response = {'error': 'this is a test rate limit error'}
+
+        responses.add(responses.GET, test_url, json=test_response, status=429)
+        with self.assertRaises(RateLimitError) as cm:
+            client._get_resource(test_url)
+
+        self.assertEqual(str(cm.exception), 'Exceeded BitBucket rate limit')
+
+    @responses.activate
+    def test_get_resource_raises_error_on_unknown_failure(self):
         client = BitBucketClient()
         test_url = 'https://api.bitbucket.org/2.0/teams/mailchimp'
         test_response = {'error': 'this is a test error'}

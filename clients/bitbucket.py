@@ -1,6 +1,6 @@
 import requests
 
-from clients.exceptions import ApiResponseError, UnknownProfileError
+from clients.exceptions import ApiResponseError, RateLimitError, UnknownProfileError
 from config import config
 
 
@@ -15,6 +15,8 @@ class BitBucketClient:
         response = requests.get(url)
         if 200 <= response.status_code <= 299:
             return response.json()
+        elif response.status_code == 429:
+            raise RateLimitError('Exceeded BitBucket rate limit')
         else:
             raise ApiResponseError(response.status_code, response.json())
 
