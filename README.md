@@ -23,3 +23,24 @@ $ python run.py
     - Missing accounts are ignored.
     - Any rate limiting or bad credentials will result in failure.
 
+## To Do:
+  - Override Username via Query Parameter
+
+      The V1 endpoint assumes that the given username reflects accounts on both GitHub and BitBucket. This might not be the case. The application should allow for query parameters to override the username for each service, possibly according to the following pattern: `GET /v1/profile/{username}?github_username={github_user}&bitbucket_username={bitbucket_user}`.
+
+  - Concurrency
+
+      Both client classes have to send multiple requests to gather all needed profile data. Running all requests sequentially causes unnecessary delays. Instead, the application can streamline its behavior by retrieving separate data concurrently, either individual requests (via a library like [`requests-futures`](https://github.com/ross/requests-futures)) or separate client methods.
+
+  - Caching
+
+      While requesting data concurrently may reduce some delays, there is no circumventing the latency inherent to rederiving information on demand. The prohibitive wait times can be effectively removed by caching information in a datastore like Redis. Depending on the use case, the application should either cache the assembled profile data (for simplicity) or the responses to individual resquests (for better fine-tuning).
+
+  - Full REST Interface
+
+      While the singular GET endpoint is sufficient for an initial prototype, it provides only a limited concept of a "merged user profile" resource (and doesn't persist data, beyond the caching suggested above). Ideally, it should provide storage for a Profile record (composed of a generic username, a GitHub username, and a BitBucket username), and expose the following endpoints:
+      - `GET /profile`: retrieves a paginated list of Profile records
+      - `GET /profile/{username}`: returns the specified profile, along with merged GitHub & BitBucket data
+      - `POST /profile`: creates a new Profile record
+      - `PATCH /profile/{username}`: updates the specified profile
+      - `DELETE /profile/{username}`: deletes the specified profile
