@@ -17,10 +17,11 @@ class GetMergedProfilesTestCase(TestCase):
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
 
-            response = endpoints.get_merged_profiles('username')
+            with endpoints.app.test_request_context('/v1/profile/username?github_username=gh_user'):
+                response = endpoints.get_merged_profiles('username')
 
-            endpoints.GithubClient.get_profile.assert_called_once_with('username')
-            endpoints.BitBucketClient.get_profile.assert_called_once_with('username')
+            endpoints.GithubClient.get_profile.assert_called_once_with('gh_user')
+            endpoints.BitBucketClient.get_profile.assert_called_once_with('username', is_team=True)
             endpoints._make_response.assert_called_once_with(
                 {
                     'github': endpoints.GithubClient.get_profile.return_value,
@@ -41,10 +42,11 @@ class GetMergedProfilesTestCase(TestCase):
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
 
-            response = endpoints.get_merged_profiles('username')
+            with endpoints.app.test_request_context('/v1/profile/username'):
+                response = endpoints.get_merged_profiles('username')
 
             endpoints.GithubClient.get_profile.assert_called_once_with('username')
-            endpoints.BitBucketClient.get_profile.assert_called_once_with('username')
+            endpoints.BitBucketClient.get_profile.assert_called_once_with('username', is_team=True)
             endpoints._make_response.assert_called_once_with(
                 {
                     'github': None,
@@ -65,7 +67,8 @@ class GetMergedProfilesTestCase(TestCase):
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
 
-            response = endpoints.get_merged_profiles('username')
+            with endpoints.app.test_request_context('/v1/profile/username'):
+                response = endpoints.get_merged_profiles('username')
 
             endpoints._make_response.assert_called_once_with(
                 {'error': 'this is a test'},
@@ -84,7 +87,8 @@ class GetMergedProfilesTestCase(TestCase):
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
 
-            response = endpoints.get_merged_profiles('username')
+            with endpoints.app.test_request_context('/v1/profile/username'):
+                response = endpoints.get_merged_profiles('username')
 
             endpoints._make_response.assert_called_once_with(
                 {'error': 'this is a test'},
@@ -103,10 +107,11 @@ class GetMergedProfilesTestCase(TestCase):
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
 
-            response = endpoints.get_merged_profiles('username')
+            with endpoints.app.test_request_context('/v1/profile/username'):
+                response = endpoints.get_merged_profiles('username')
 
             endpoints.GithubClient.get_profile.assert_called_once_with('username')
-            endpoints.BitBucketClient.get_profile.assert_called_once_with('username')
+            endpoints.BitBucketClient.get_profile.assert_called_once_with('username', is_team=True)
             endpoints._make_response.assert_called_once_with(
                 {
                     'github': endpoints.GithubClient.get_profile.return_value,
@@ -127,7 +132,8 @@ class GetMergedProfilesTestCase(TestCase):
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
 
-            response = endpoints.get_merged_profiles('username')
+            with endpoints.app.test_request_context('/v1/profile/username'):
+                response = endpoints.get_merged_profiles('username')
 
             endpoints._make_response.assert_called_once_with(
                 {'error': 'this is a test'},
