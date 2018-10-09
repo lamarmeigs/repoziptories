@@ -11,18 +11,17 @@ Prior to running this application, please note the following prerequisites:
 
 That done, running the application is as simple as executing the following commands:
 ```bash
-$ pipenv install
-$ pipenv shell
-$ python run.py
+$ pipenv sync
+$ pipenv run python run.py
 ```
 
 
 ## Changelog
 ### Version 1.1
-  - Updates `GET /v1/profile/{username}` to accept overriding usernames:
+  - Updates `GET /v1/profile/{username}` to accept overriding query parameters:
     - `?github_username`: will be used instead of `username` when retrieving GitHub profile data
     - `?bitbucket_username`: will be used instead of `username` when retrieving BitBucket profile data
-    - `?bitbucket_team`: indicates either the BitBucket profile is that of a team or an individual user
+    - `?bitbucket_team`: indicates that the BitBucket profile is that of a team or an individual user
 
 ### Version 1.0
   - A single endpoint exists: `GET /v1/profile/{username}`
