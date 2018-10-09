@@ -29,8 +29,7 @@ class GithubClientTestCase(TestCase):
             context_managers = (
                 mock.patch.object(client.client, 'get_user'),
                 mock.patch.object(client, '_get_user_data', return_value={}),
-                mock.patch.object(client, '_get_repository_data', return_value={}),
-                mock.patch.object(client, '_get_misc_data', side_effect=error),
+                mock.patch.object(client, '_get_repository_data', side_effect=error),
             )
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
@@ -46,7 +45,6 @@ class GithubClientTestCase(TestCase):
                 mock.patch.object(client.client, 'get_user'),
                 mock.patch.object(client, '_get_user_data', return_value={'user': 'data'}),
                 mock.patch.object(client, '_get_repository_data', return_value={'repo': 'data'}),
-                mock.patch.object(client, '_get_misc_data', return_value={'misc': 'data'}),
             )
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
@@ -58,13 +56,7 @@ class GithubClientTestCase(TestCase):
             client._get_repository_data.assert_called_once_with(
                 client.client.get_user.return_value
             )
-            client._get_misc_data.assert_called_once_with(
-                client.client.get_user.return_value
-            )
-            self.assertEqual(
-                data,
-                {'user': 'data', 'repo': 'data', 'misc': 'data'}
-            )
+            self.assertEqual(data, {'user': 'data', 'repo': 'data'})
 
     def test_get_user_data_retrieves_data(self):
         user = mock.MagicMock()
@@ -79,14 +71,16 @@ class GithubClientTestCase(TestCase):
         user = mock.MagicMock()
         user.get_repos.return_value = [
             mock.MagicMock(
-                forked=True,
+                fork=True,
                 stargazers_count=2,
+                open_issues_count=4,
                 language='Python',
                 topics=['test', 'repositories']
             ),
             mock.MagicMock(
-                forked=False,
+                fork=False,
                 stargazers_count=3,
+                open_issues_count=0,
                 language='JavaScript',
                 topics=None,
             )
@@ -96,15 +90,6 @@ class GithubClientTestCase(TestCase):
         self.assertIsInstance(data, dict)
         self.assertEqual(data['repositories'], {'original': 1, 'forked': 1})
         self.assertEqual(data['stars'], 5)
+        self.assertEqual(data['issues'], 4)
         self.assertCountEqual(data['languages'], ['Python', 'JavaScript'])
         self.assertCountEqual(data['topics'], ['test', 'repositories'])
-
-    def test_get_misc_data_retrieves_data(self):
-        client = GithubClient()
-        user = mock.MagicMock(login='foobar')
-        with mock.patch.object(client.client, 'search_issues') as mock_search:
-            mock_search.return_value.totalCount = 4
-            data = client._get_misc_data(user)
-
-        mock_search.assert_called_once_with('author:foobar')
-        self.assertEqual(data, {'issues': 4})

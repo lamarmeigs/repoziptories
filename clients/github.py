@@ -37,7 +37,6 @@ class GithubClient:
         try:
             profile.update(self._get_user_data(user))
             profile.update(self._get_repository_data(user))
-            profile.update(self._get_misc_data(user))
         except github.RateLimitExceededException:
             raise RateLimitError('Exceeded GitHub rate limit')
 
@@ -45,7 +44,7 @@ class GithubClient:
 
     @staticmethod
     def _get_user_data(user):
-        """Retrieve data related to the given user account
+        """Retrieve data related to the given user account.
 
         Args:
             user (github.NamedUser.NamedUser): an instantiated GitHub user
@@ -83,15 +82,17 @@ class GithubClient:
         forked_repo_count = 0
         original_repo_commits = 0
         stars_received = 0
+        issues = 0
         languages = set()
         topics = set()
         for repo in user.get_repos():
-            if not repo.forked:
+            if not repo.fork:
                 original_repo_count += 1
                 original_repo_commits += repo.get_commits(author=user).totalCount
             else:
                 forked_repo_count += 1
             stars_received += repo.stargazers_count
+            issues += repo.open_issues_count
             if repo.language:
                 languages.add(repo.language)
             if repo.topics:
@@ -103,21 +104,7 @@ class GithubClient:
                 'forked': forked_repo_count,
             },
             'stars': stars_received,
+            'issues': issues,
             'languages': list(languages),
             'topics': list(topics),
-        }
-
-    def _get_misc_data(self, user):
-        """Retrieve relevant non-user, non-repository profile data.
-
-        Args:
-            user (github.NamedUser.NamedUser): an instantiated GitHub user
-
-        Return:
-            a dict containing:
-                - the number of issues created by the user
-        """
-        # TODO: Calculate the "size" of the user account
-        return {
-            'issues': self.client.search_issues('author:{}'.format(user.login)).totalCount
         }
