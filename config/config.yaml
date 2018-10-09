@@ -1,1 +1,2 @@
 github_token: 'some_token'
+bitbucket_base_url: 'https://api.bitbucket.org/2.0'
