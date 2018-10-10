@@ -1,9 +1,8 @@
 from distutils.util import strtobool
 
-from flask import request
+from flask import Blueprint, request
 
 from application.api.common import make_response
-from application.app import app
 from application.helpers import merge_profiles
 from clients import GithubClient, BitBucketClient
 from clients.exceptions import (
@@ -14,7 +13,10 @@ from clients.exceptions import (
 from config import config
 
 
-@app.route('/v2/profile/<username>')
+v2_blueprint = Blueprint('v2', __name__)
+
+
+@v2_blueprint.route('/profile/<username>')
 def get_merged_profiles_v2(username):
     github_username = request.args.get('github_username', username)
     github_client = GithubClient(config['github_token'])

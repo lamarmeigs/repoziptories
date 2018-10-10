@@ -1,9 +1,8 @@
 from distutils.util import strtobool
 
-from flask import request
+from flask import Blueprint, request
 
 from application.api.common import make_response
-from application.app import app
 from clients import GithubClient, BitBucketClient
 from clients.exceptions import (
     InvalidCredentialsError,
@@ -13,7 +12,10 @@ from clients.exceptions import (
 from config import config
 
 
-@app.route('/v1/profile/<username>')
+v1_blueprint = Blueprint('v1', __name__)
+
+
+@v1_blueprint.route('/profile/<username>')
 def get_merged_profiles_v1(username):
     profile = {}
 

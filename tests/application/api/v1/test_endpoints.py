@@ -2,6 +2,7 @@ from contextlib import ExitStack
 from unittest import mock, TestCase
 
 from application.api.v1 import endpoints
+from application.app import app
 from clients import exceptions
 
 
@@ -16,7 +17,7 @@ class GetMergedProfilesTestCase(TestCase):
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
 
-            with endpoints.app.test_request_context('/v1/profile/username?github_username=gh_user'):
+            with app.test_request_context('/v1/profile/username?github_username=gh_user'):
                 response = endpoints.get_merged_profiles_v1('username')
 
             endpoints.GithubClient.get_profile.assert_called_once_with('gh_user')
@@ -41,7 +42,7 @@ class GetMergedProfilesTestCase(TestCase):
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
 
-            with endpoints.app.test_request_context('/v1/profile/username'):
+            with app.test_request_context('/v1/profile/username'):
                 response = endpoints.get_merged_profiles_v1('username')
 
             endpoints.GithubClient.get_profile.assert_called_once_with('username')
@@ -66,7 +67,7 @@ class GetMergedProfilesTestCase(TestCase):
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
 
-            with endpoints.app.test_request_context('/v1/profile/username'):
+            with app.test_request_context('/v1/profile/username'):
                 response = endpoints.get_merged_profiles_v1('username')
 
             endpoints.make_response.assert_called_once_with(
@@ -86,7 +87,7 @@ class GetMergedProfilesTestCase(TestCase):
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
 
-            with endpoints.app.test_request_context('/v1/profile/username'):
+            with app.test_request_context('/v1/profile/username'):
                 response = endpoints.get_merged_profiles_v1('username')
 
             endpoints.make_response.assert_called_once_with(
@@ -106,7 +107,7 @@ class GetMergedProfilesTestCase(TestCase):
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
 
-            with endpoints.app.test_request_context('/v1/profile/username'):
+            with app.test_request_context('/v1/profile/username'):
                 response = endpoints.get_merged_profiles_v1('username')
 
             endpoints.GithubClient.get_profile.assert_called_once_with('username')
@@ -131,7 +132,7 @@ class GetMergedProfilesTestCase(TestCase):
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
 
-            with endpoints.app.test_request_context('/v1/profile/username'):
+            with app.test_request_context('/v1/profile/username'):
                 response = endpoints.get_merged_profiles_v1('username')
 
             endpoints.make_response.assert_called_once_with(
