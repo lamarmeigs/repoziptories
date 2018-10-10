@@ -17,6 +17,12 @@ $ pipenv run python run.py
 
 
 ## Changelog
+### Version 2.0
+  - Adds a new endpoint: `GET /v2/profile/{username}`
+    - Merges profile data from GitHub and BitBucket (which, y'know, was the whole point)
+    - Query parameter behavior stays the same
+  - Adds missing watchers and commit counts from GitHub
+
 ### Version 1.1
   - Updates `GET /v1/profile/{username}` to accept overriding query parameters:
     - `?github_username`: will be used instead of `username` when retrieving GitHub profile data
