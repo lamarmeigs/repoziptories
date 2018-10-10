@@ -12,8 +12,15 @@ Prior to running this application, please note the following prerequisites:
 That done, running the application is as simple as executing the following commands:
 ```bash
 $ pipenv sync
-$ pipenv run python run.py
+$ pipenv run python run.py  # Ctrl-C to quit
 ```
+
+Existing endpoints will be available at:
+
+  - `GET http://127.0.0.1:5000/v2/profile/{username}`
+  - `GET http://127.0.0.1:5000/v1/profile/{username}`
+
+See below for more details.
 
 
 ## Changelog
@@ -38,6 +45,10 @@ $ pipenv run python run.py
 
 
 ## To Do:
+  - Missing BitBucket data
+
+      Currently, retrieving the desired data is done on a "best effort" basis. Some information (eg. is a BitBucket repository original or forked? does is have a concept of "topics?" how should the "size" of GitHub account be measured?) seems notoriously difficult to discover. As such, enough data is fetched for a proof-of-concept. To finalize, the exact mapping of service-specific data to a general profile should be established.
+
   - Concurrency
 
       Both client classes have to send multiple requests to gather all needed profile data. Running all requests sequentially causes unnecessary delays. Instead, the application can streamline its behavior by retrieving separate data concurrently, either individual requests (via a library like [`requests-futures`](https://github.com/ross/requests-futures)) or separate client methods.
@@ -48,7 +59,7 @@ $ pipenv run python run.py
 
   - Full REST Interface
 
-      While the singular GET endpoint is sufficient for an initial prototype, it provides only a limited concept of a "merged user profile" resource (and doesn't persist data, beyond the caching suggested above). Ideally, it should provide storage for a Profile record (composed of a generic username, a GitHub username, and a BitBucket username), and expose the following endpoints:
+      While the singular GET endpoint is sufficient for an initial prototype, it provides only a limited concept of a "merged user profile" resource (and doesn't persist data, beyond the caching suggested above). Ideally, it should provide storage for a Profile record (composed of a generic username, a GitHub username, and a BitBucket username -- which, incidentally, will avoid the need for janky query parameters), and expose the following endpoints:
       - `GET /profile`: retrieves a paginated list of Profile records
       - `GET /profile/{username}`: returns the specified profile, along with merged GitHub & BitBucket data
       - `POST /profile`: creates a new Profile record
