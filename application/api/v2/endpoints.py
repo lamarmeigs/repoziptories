@@ -1,8 +1,10 @@
 from distutils.util import strtobool
 
-from flask import Flask, request
+from flask import request
 
-from application.helpers import make_response, merge_profiles
+from application.api.common import make_response
+from application.app import app
+from application.helpers import merge_profiles
 from clients import GithubClient, BitBucketClient
 from clients.exceptions import (
     InvalidCredentialsError,
@@ -12,11 +14,8 @@ from clients.exceptions import (
 from config import config
 
 
-app = Flask(__name__.split('.')[0])
-
-
-@app.route('/v1/profile/<username>')
-def get_merged_profiles(username):
+@app.route('/v2/profile/<username>')
+def get_merged_profiles_v2(username):
     github_username = request.args.get('github_username', username)
     github_client = GithubClient(config['github_token'])
     try:

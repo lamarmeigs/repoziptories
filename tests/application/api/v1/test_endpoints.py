@@ -1,7 +1,7 @@
 from contextlib import ExitStack
 from unittest import mock, TestCase
 
-from application import endpoints
+from application.api.v1 import endpoints
 from clients import exceptions
 
 
@@ -11,23 +11,21 @@ class GetMergedProfilesTestCase(TestCase):
             context_managers = (
                 mock.patch.object(endpoints.GithubClient, 'get_profile'),
                 mock.patch.object(endpoints.BitBucketClient, 'get_profile'),
-                mock.patch.object(endpoints, 'merge_profiles'),
                 mock.patch.object(endpoints, 'make_response'),
             )
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
 
             with endpoints.app.test_request_context('/v1/profile/username?github_username=gh_user'):
-                response = endpoints.get_merged_profiles('username')
+                response = endpoints.get_merged_profiles_v1('username')
 
             endpoints.GithubClient.get_profile.assert_called_once_with('gh_user')
             endpoints.BitBucketClient.get_profile.assert_called_once_with('username', is_team=True)
-            endpoints.merge_profiles.assert_called_once_with(
-                endpoints.GithubClient.get_profile.return_value,
-                endpoints.BitBucketClient.get_profile.return_value,
-            )
             endpoints.make_response.assert_called_once_with(
-                endpoints.merge_profiles.return_value,
+                {
+                    'github': endpoints.GithubClient.get_profile.return_value,
+                    'bitbucket': endpoints.BitBucketClient.get_profile.return_value,
+                },
                 200
             )
             self.assertEqual(response, endpoints.make_response.return_value)
@@ -38,23 +36,21 @@ class GetMergedProfilesTestCase(TestCase):
             context_managers = (
                 mock.patch.object(endpoints.GithubClient, 'get_profile', side_effect=error),
                 mock.patch.object(endpoints.BitBucketClient, 'get_profile'),
-                mock.patch.object(endpoints, 'merge_profiles'),
                 mock.patch.object(endpoints, 'make_response'),
             )
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
 
             with endpoints.app.test_request_context('/v1/profile/username'):
-                response = endpoints.get_merged_profiles('username')
+                response = endpoints.get_merged_profiles_v1('username')
 
             endpoints.GithubClient.get_profile.assert_called_once_with('username')
             endpoints.BitBucketClient.get_profile.assert_called_once_with('username', is_team=True)
-            endpoints.merge_profiles.assert_called_once_with(
-                None,
-                endpoints.BitBucketClient.get_profile.return_value,
-            )
             endpoints.make_response.assert_called_once_with(
-                endpoints.merge_profiles.return_value,
+                {
+                    'github': None,
+                    'bitbucket': endpoints.BitBucketClient.get_profile.return_value,
+                },
                 200
             )
             self.assertEqual(response, endpoints.make_response.return_value)
@@ -65,14 +61,13 @@ class GetMergedProfilesTestCase(TestCase):
             context_managers = (
                 mock.patch.object(endpoints.GithubClient, 'get_profile', side_effect=error),
                 mock.patch.object(endpoints.BitBucketClient, 'get_profile'),
-                mock.patch.object(endpoints, 'merge_profiles'),
                 mock.patch.object(endpoints, 'make_response'),
             )
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
 
             with endpoints.app.test_request_context('/v1/profile/username'):
-                response = endpoints.get_merged_profiles('username')
+                response = endpoints.get_merged_profiles_v1('username')
 
             endpoints.make_response.assert_called_once_with(
                 {'error': 'this is a test'},
@@ -86,14 +81,13 @@ class GetMergedProfilesTestCase(TestCase):
             context_managers = (
                 mock.patch.object(endpoints.GithubClient, 'get_profile', side_effect=error),
                 mock.patch.object(endpoints.BitBucketClient, 'get_profile'),
-                mock.patch.object(endpoints, 'merge_profiles'),
                 mock.patch.object(endpoints, 'make_response'),
             )
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
 
             with endpoints.app.test_request_context('/v1/profile/username'):
-                response = endpoints.get_merged_profiles('username')
+                response = endpoints.get_merged_profiles_v1('username')
 
             endpoints.make_response.assert_called_once_with(
                 {'error': 'this is a test'},
@@ -107,23 +101,21 @@ class GetMergedProfilesTestCase(TestCase):
             context_managers = (
                 mock.patch.object(endpoints.GithubClient, 'get_profile'),
                 mock.patch.object(endpoints.BitBucketClient, 'get_profile', side_effect=error),
-                mock.patch.object(endpoints, 'merge_profiles'),
                 mock.patch.object(endpoints, 'make_response'),
             )
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
 
             with endpoints.app.test_request_context('/v1/profile/username'):
-                response = endpoints.get_merged_profiles('username')
+                response = endpoints.get_merged_profiles_v1('username')
 
             endpoints.GithubClient.get_profile.assert_called_once_with('username')
             endpoints.BitBucketClient.get_profile.assert_called_once_with('username', is_team=True)
-            endpoints.merge_profiles.assert_called_once_with(
-                endpoints.GithubClient.get_profile.return_value,
-                None
-            )
             endpoints.make_response.assert_called_once_with(
-                endpoints.merge_profiles.return_value,
+                {
+                    'github': endpoints.GithubClient.get_profile.return_value,
+                    'bitbucket': None,
+                },
                 200
             )
             self.assertEqual(response, endpoints.make_response.return_value)
@@ -134,14 +126,13 @@ class GetMergedProfilesTestCase(TestCase):
             context_managers = (
                 mock.patch.object(endpoints.GithubClient, 'get_profile'),
                 mock.patch.object(endpoints.BitBucketClient, 'get_profile', side_effect=error),
-                mock.patch.object(endpoints, 'merge_profiles'),
                 mock.patch.object(endpoints, 'make_response'),
             )
             for context_manager in context_managers:
                 stack.enter_context(context_manager)
 
             with endpoints.app.test_request_context('/v1/profile/username'):
-                response = endpoints.get_merged_profiles('username')
+                response = endpoints.get_merged_profiles_v1('username')
 
             endpoints.make_response.assert_called_once_with(
                 {'error': 'this is a test'},
